@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>推客联盟 · 领券 | 优惠平台</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f7fc;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 顶部条 */
+        .top-bar {
+            background: linear-gradient(98deg, #ff7846, #ff5722);
+            color: white;
+            text-align: center;
+            font-size: 13px;
+            padding: 10px 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* 轮播区 */
+        .carousel-section {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        }
+        .carousel-container { position: relative; width: 100%; touch-action: pan-y; }
+        .carousel-wrapper { display: flex; transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        .carousel-slide { flex: 0 0 100%; }
+        .carousel-slide img { width: 100%; aspect-ratio: 16/7; object-fit: cover; display: block; background: #eef2f6; }
+        .carousel-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 36px; height: 36px; background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(4px); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            color: white; font-size: 20px; z-index: 10;
+            transition: all 0.2s ease;
+        }
+        .carousel-btn:hover {
+            background: rgba(0,0,0,0.55);
+            transform: translateY(-50%) scale(1.05);
+        }
+        .carousel-btn:active {
+            transform: translateY(-50%) scale(0.96);
+        }
+        .btn-prev { left: 12px; }
+        .btn-next { right: 12px; }
+        .dots {
+            position: absolute; bottom: 12px; left: 0; right: 0;
+            display: flex; justify-content: center; gap: 10px; z-index: 10;
+        }
+        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.6); border-radius: 50%; cursor: pointer; transition: all 0.2s; }
+        .dot.active { width: 22px; background: #ff7846; border-radius: 12px; }
+        .dot:hover { background: #ffaa7a; transform: scale(1.1); }
+
+        /* 分区共用 */
+        .section {
+            padding: 28px 20px 24px;
+            border-bottom: 1px solid #edeff2;
+        }
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2c3e66, #1e2f48);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            border-left: 4px solid #ff7846;
+            padding-left: 14px;
+        }
+        .section-header span {
+            font-size: 13px;
+            color: #ff7846;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .section-header span:hover {
+            color: #ff5722;
+            text-decoration: underline;
+        }
+
+        /* 全部分类模块 - Tab区域 (动态网格) */
+        .category-tabs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+            gap: 12px 10px;
+            margin-bottom: 24px;
+            background: transparent;
+        }
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 10px 6px;
+            background: #f1f3f9;
+            border-radius: 48px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5b6e;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .tab-btn i { font-size: 14px; transition: transform 0.2s; }
+        .tab-btn:hover {
+            background: #ffe5d9;
+            color: #ff7846;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255,120,70,0.12);
+        }
+        .tab-btn:active {
+            transform: scale(0.96);
+            background: #ffd9c9;
+        }
+        .tab-btn.active {
+            background: #ff7846;
+            color: white;
+            box-shadow: 0 8px 18px rgba(255, 120, 70, 0.28);
+        }
+        .tab-btn.active:hover {
+            background: #ff6328;
+            transform: translateY(-1px);
+        }
+        @media (max-width: 440px) {
+            .category-tabs {
+                grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+                gap: 10px 8px;
+            }
+            .tab-btn { font-size: 13px; padding: 8px 4px; white-space: nowrap; }
+        }
+        
+        /* 子分类网格（全部分类卡片）自适应换行 + 交互特效 */
+        .subcat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(98px, 1fr));
+            gap: 18px 12px;
+            margin-top: 8px;
+        }
+        .grid-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 14px 6px;
+            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f7f0ea;
+        }
+        /* 停留选中特效 */
+        .grid-icon-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 28px -8px rgba(255, 120, 70, 0.25);
+            border-color: #ffccb5;
+            background: #fffefc;
+        }
+        /* 点击特效 */
+        .grid-icon-item:active {
+            transform: scale(0.95);
+            background: #fff3ec;
+            transition: transform 0.08s;
+        }
+        .grid-icon-item .icon-bg {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(145deg, #fff4ed, #ffe9e0);
+            border-radius: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #ff7846;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .grid-icon-item:hover .icon-bg {
+            background: linear-gradient(145deg, #ffefe5, #ffded0);
+            transform: scale(1.02);
+        }
+        .grid-icon-item span { font-size: 13px; font-weight: 600; color: #2d3e50; word-break: break-word; }
+        .grid-icon-item small { font-size: 10px; color: #ff8a5c; margin-top: 5px; }
+
+        /* 醒目常用分类 卡片特效 */
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px 14px;
+            margin: 10px 0 8px;
+        }
+        .feature-card {
+            background: linear-gradient(125deg, #ffffff, #fff9f5);
+            border-radius: 32px;
+            padding: 20px 8px;
+            text-align: center;
+            box-shadow: 0 12px 22px -10px rgba(255, 120, 70, 0.2);
+            border: 1px solid rgba(255, 120, 70, 0.3);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 34px -12px rgba(255, 88, 34, 0.35);
+            border-color: #ffaa7a;
+        }
+        .feature-card:active {
+            transform: scale(0.96);
+            background: #fff4ec;
+        }
+        .feature-card i {
+            font-size: 44px;
+            background: #ffefe5;
+            width: 74px;
+            height: 74px;
+            line-height: 74px;
+            border-radius: 50%;
+            color: #ff7846;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .feature-card:hover i {
+            transform: scale(1.05);
+            background: #ffe3d6;
+        }
+        .feature-card h4 { font-size: 15px; font-weight: 800; margin: 8px 0 4px; }
+        .feature-card .tag { font-size: 11px; background: #ff784610; color: #ff7846; border-radius: 30px; padding: 4px 12px; display: inline-block; font-weight: 600; transition: 0.2s; }
+        .feature-card:hover .tag { background: #ff7846; color: white; }
+
+        /* 限时神券卡片特效 */
+        .coupon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 18px 12px;
+        }
+        .coupon-card {
+            background: white;
+            border-radius: 28px;
+            padding: 16px 8px;
+            text-align: center;
+            border: 1px solid #ffe1d4;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .coupon-card:hover {
+            transform: translateY(-6px);
+            border-color: #ff9966;
+            box-shadow: 0 18px 28px -12px rgba(255, 87, 34, 0.28);
+            background: #fffaf7;
+        }
+        .coupon-card:active {
+            transform: scale(0.95);
+            background: #fff2ea;
+        }
+        .coupon-card .icon-lg {
+            font-size: 36px;
+            width: 68px;
+            height: 68px;
+            line-height: 68px;
+            background: #fef0e9;
+            border-radius: 50%;
+            display: inline-block;
+            color: #ff7846;
+            margin-bottom: 8px;
+            transition: 0.2s;
+        }
+        .coupon-card:hover .icon-lg {
+            background: #ffe6db;
+            transform: scale(1.04);
+        }
+        .coupon-card h4 { font-size: 14px; font-weight: 700; margin: 6px 0; }
+        .coupon-card .tag { font-size: 11px; background: #ff78460c; padding: 3px 12px; border-radius: 40px; display: inline-block; transition: 0.2s; }
+        .coupon-card:hover .tag { background: #ff7846; color: white; }
+
+        /* 热门推荐 / 最新上线混合模块 */
+        .mix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 18px;
+        }
+        .mix-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid #f2eae5;
+        }
+        .mix-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 32px -12px rgba(255, 88, 34, 0.25);
+            border-color: #ffc8b0;
+        }
+        .mix-card:active {
+            transform: scale(0.97);
+            transition: transform 0.08s;
+        }
+        .mix-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #fdf3ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #ff946b;
+            transition: all 0.2s;
+        }
+        .mix-card:hover .mix-img {
+            background: #ffe8df;
+            color: #ff7846;
+        }
+        .mix-info { padding: 12px 12px 16px; }
+        .mix-info h4 { font-size: 15px; font-weight: 700; word-break: break-word; }
+        .price { font-weight: 800; color: #f25c2c; font-size: 16px; margin-top: 5px; }
+        .old-price { font-size: 11px; text-decoration: line-through; color: #9aa6b5; margin-left: 6px; }
+        .coupon-badge { background: #fee8e0; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; color: #ff7846; display: inline-block; margin-top: 8px; transition: 0.2s; }
+        .mix-card:hover .coupon-badge { background: #ff7846; color: white; }
+
+        /* 品牌特惠模块 */
+        .brand-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+        }
+        .brand-item {
+            background: #fefaf8;
+            border-radius: 28px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid #ffe3d8;
+        }
+        .brand-item:hover {
+            transform: translateY(-5px);
+            border-color: #ffaa7a;
+            background: #ffffff;
+            box-shadow: 0 14px 24px -8px rgba(255, 88, 34, 0.2);
+        }
+        .brand-item:active {
+            transform: scale(0.96);
+            background: #fff5ef;
+        }
+        .brand-item i { font-size: 38px; color: #ff7846; margin-bottom: 8px; display: block; transition: transform 0.2s; }
+        .brand-item:hover i { transform: scale(1.08); }
+        .brand-item h4 { font-size: 14px; font-weight: 600; }
+
+        /* ========= 友情链接模块 - 动态网格化 + 交互特效 ========= */
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+            gap: 20px 14px;
+            margin-top: 8px;
+        }
+        .friend-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 18px 8px 16px;
+            text-align: center;
+            border: 1px solid #ffe0d0;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.85, 0.4, 1);
+            box-shadow: 0 6px 12px rgba(255, 87, 34, 0.04);
+            width: 100%;
+            display: block;
+        }
+        /* 停留选中特效（悬浮/触摸悬停） */
+        .friend-card:hover {
+            transform: translateY(-6px);
+            border-color: #ff946b;
+            background: #fffefa;
+            box-shadow: 0 20px 28px -12px rgba(255, 88, 34, 0.28);
+        }
+        /* 点击特效（瞬间反馈） */
+        .friend-card:active {
+            transform: scale(0.96);
+            background: #fff2ea;
+            transition: transform 0.06s;
+        }
+        .friend-card i {
+            font-size: 44px;
+            background: linear-gradient(145deg, #fff3ec, #ffe6db);
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 60px;
+            color: #ff7846;
+            margin-bottom: 12px;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .friend-card:hover i {
+            background: linear-gradient(145deg, #ffe7dc, #ffd9c8);
+            transform: scale(1.05);
+        }
+        .friend-card h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 8px 0 4px;
+            white-space: nowrap;
+            overflow-x: auto;
+            max-width: 100%;
+            letter-spacing: -0.2px;
+        }
+        .friend-card p {
+            font-size: 11px;
+            color: #ff7846;
+            background: #fff0e8;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: 0.2s;
+        }
+        .friend-card:hover p {
+            background: #ff7846;
+            color: white;
+        }
+
+        @media (max-width: 560px) {
+            .friends-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 14px 10px;
+            }
+            .friend-card { padding: 14px 6px 12px; }
+            .friend-card i { width: 64px; height: 64px; line-height: 64px; font-size: 36px; margin-bottom: 8px; }
+            .friend-card h4 { font-size: 13px; white-space: normal; word-break: keep-all; }
+        }
+        @media (min-width: 1024px) {
+            .friend-card:hover {
+                transform: translateY(-8px);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            background: #fefbf9;
+            font-size: 12px;
+            color: #8e9daf;
+            border-top: 1px solid #eee8e2;
+        }
+
+        @media (max-width: 640px) {
+            .section { padding: 20px 16px; }
+            .subcat-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 14px 8px; }
+            .grid-icon-item .icon-bg { width: 52px; height: 52px; font-size: 26px; }
+            .featured-grid { gap: 12px; }
+            .feature-card i { width: 56px; height: 56px; line-height: 56px; font-size: 30px; }
+            .coupon-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+            .mix-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+        }
+        /* 统一 transition 提升丝滑感 */
+        .grid-icon-item, .feature-card, .coupon-card, .mix-card, .brand-item, .friend-card, .tab-btn {
+            will-change: transform;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="top-bar">
+        <i class="fas fa-ticket-alt"></i> 推客联盟 · 衣食住行天天领券 跳转即享折扣
+    </div>
+
+    <!-- 轮播区域 -->
+    <div class="carousel-section">
+        <div class="carousel-container">
+            <div class="carousel-wrapper" id="carouselWrapper"></div>
+            <div class="carousel-btn btn-prev" id="prevBtn"><i class="fas fa-chevron-left"></i></div>
+            <div class="carousel-btn btn-next" id="nextBtn"><i class="fas fa-chevron-right"></i></div>
+            <div class="dots" id="dotsContainer"></div>
+        </div>
+    </div>
+
+    <!-- 全部分类 (Tab动态网格 + 子项网格自适应换行) -->
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-grid-2"></i> 全部分类 · 海量优惠直达</h2>
+            <span>全部 ></span>
+        </div>
+        <div class="category-tabs" id="categoryTabs"></div>
+        <div id="categoriesGridContainer" class="subcat-grid"></div>
+    </div>
+
+    <!-- 常用分类 醒目6个入口 -->
+    <div class="section" style="background: #fffaf7; border-radius: 32px; margin: 0 12px 20px 12px; padding: 20px 18px;">
+        <div class="section-header">
+            <h2><i class="fas fa-rocket"></i> 极速常用 · 爆款直领</h2>
+            <span>限时加码></span>
+        </div>
+        <div id="featuredSix" class="featured-grid"></div>
+    </div>
+
+    <!-- 限时神券模块 -->
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-hourglass-half"></i> 限时神券 · 先领券再下单</h2>
+            <span>整点秒杀></span>
+        </div>
+        <div id="couponZone" class="coupon-grid"></div>
+    </div>
+
+    <!-- 品牌特惠 · 大牌折上折 -->
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-crown"></i> 品牌特惠 · 大牌专享</h2>
+            <span>查看更多></span>
+        </div>
+        <div id="brandZone" class="brand-grid"></div>
+    </div>
+
+    <!-- 今日必抢热门推荐 -->
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-bolt"></i> 今日必抢 · 人气爆款</h2>
+            <span>爆款直降></span>
+        </div>
+        <div id="hotProducts" class="mix-grid"></div>
+    </div>
+
+    <!-- 猜你喜欢 / 口碑优选 -->
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-heart"></i> 猜你喜欢 · 口碑优选</h2>
+            <span>发现更多></span>
+        </div>
+        <div id="guessLike" class="mix-grid"></div>
+    </div>
+	
+    <!-- ========= 友情链接模块 · 动态网格化设计 + 交互特效 ========= -->
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-handshake"></i> 友情链接 · 合作伙伴</h2>
+            <span>友好互联></span>
+        </div>
+        <div id="friendLinksContainer" class="friends-grid"></div>
+    </div>
+
+    <div class="footer">
+        <i class="fas fa-hand-holding-usd"></i> 推客联盟 · 直达官方优惠，佣金不显示，安心领券 <br/>
+        点击任意图标立即跳转，享折上折福利
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 完全可配置数据区 (支持动态新增、网格自动排列)
+    // ============================================================
+    
+    // 1. 轮播图数据
+    const banners = [
+        { img: "https://picsum.photos/id/20/1200/400", link: "https://open.cdyunzhanxinxi.com/link/100048369ecde5b6e5a01000e1cfzGDi", alt: "美食红包雨" },
+        { img: "https://picsum.photos/id/26/1200/400", link: "https://open.cdyunzhanxinxi.com/link/100012769ed5bd8227f61000QaEDbB2x", alt: "出行酒店5折" },
+        { img: "https://picsum.photos/id/38/1200/400", link: "https://s.click.taobao.com/banner_life", alt: "生活服务狂欢" }
+    ];
+
+    // 2. 全部分类数据
+    const majorCategories = [
+        {
+            name: "美食外卖",
+            iconPre: "fa-utensils",
+            items: [
+                { name: "美团外卖", icon: "fab fa-react", link: "https://open.cdyunzhanxinxi.com/link/100048369ecde5b6e5a01000e1cfzGDi", desc: "天天领红包" },
+                { name: "淘宝闪购", icon: "fas fa-pizza-slice", link: "https://market.m.taobao.com/app/starlink/wakeup-transit/pages/download?star_id=9249&slk_force_set_request=true&scene=524d32c60ee84078b38f2f4bf99c866c", desc: "大额外卖券" },
+                { name: "京东外卖", icon: "fas fa-hamburger", link: "https://open.cdyunzhanxinxi.com/link/100098369ecc5d227ed71002zfmehmAp", desc: "惊喜红包券" },
+				{ name: "肯德基", icon: "fab fa-fort-awesome", link: "https://s.click.taobao.com/kfc_aff", desc: "疯狂星期四" },
+                { name: "星巴克", icon: "fas fa-mug-hot", link: "https://s.click.taobao.com/sb_aff", desc: "买一送一" },
+                { name: "必胜客", icon: "fas fa-cheese", link: "https://s.click.taobao.com/bsh_aff", desc: "半价披萨" },
+                { name: "海底捞", icon: "fas fa-fish", link: "https://s.click.taobao.com/hdl_aff", desc: "满300减50" },
+                { name: "瑞幸咖啡", icon: "fas fa-coffee", link: "https://s.click.taobao.com/luckin_aff", desc: "9.9元券" }
+            ]
+        },
+        {
+            name: "出行打车",
+            iconPre: "fa-car",
+            items: [
+                { name: "滴滴出行", icon: "fas fa-taxi", link: "https://open.cdyunzhanxinxi.com/link/100088969ed5c058b86b1000aDJNxMMY", desc: "快车5折" },
+                { name: "高德打车", icon: "fas fa-map-marked-alt", link: "https://s.click.taobao.com/gd_aff", desc: "天天优惠" },
+                { name: "哈啰出行", icon: "fas fa-bicycle", link: "https://s.click.taobao.com/hl_aff", desc: "顺风车券" },
+                { name: "T3出行", icon: "fas fa-car-side", link: "https://s.click.taobao.com/t3_aff", desc: "新人立减" },
+                { name: "携程旅行", icon: "fas fa-plane-departure", link: "https://s.click.taobao.com/xc_aff", desc: "酒店5折" },
+                { name: "飞猪旅行", icon: "fas fa-hotel", link: "https://open.cdyunzhanxinxi.com/link/100012769ed5bd8227f61000QaEDbB2x", desc: "机票优惠" },
+                { name: "去哪儿", icon: "fas fa-globe", link: "https://s.click.taobao.com/qnr_aff", desc: "特价门票" },
+                { name: "同程旅行", icon: "fas fa-train", link: "https://s.click.taobao.com/tc_aff", desc: "火车票立减" }
+            ]
+        },
+        {
+            name: "生活服务",
+            iconPre: "fa-hand-sparkles",
+            items: [
+                { name: "大众点评", icon: "fas fa-star-half-alt", link: "https://s.click.taobao.com/dp_aff", desc: "霸王餐" },
+                { name: "闲鱼", icon: "fas fa-exchange-alt", link: "https://s.click.taobao.com/xy_aff", desc: "闲置捡漏" },
+                { name: "58同城", icon: "fas fa-building", link: "https://s.click.taobao.com/_58_aff", desc: "家政保洁" },
+                { name: "货拉拉", icon: "fas fa-truck-moving", link: "https://s.click.taobao.com/hll_aff", desc: "搬家券" },
+                { name: "UU跑腿", icon: "fas fa-running", link: "https://s.click.taobao.com/uu_aff", desc: "极速送达" },
+                { name: "菜鸟裹裹", icon: "fas fa-box-open", link: "https://s.click.taobao.com/cn_aff", desc: "寄件优惠" },
+                { name: "自如租房", icon: "fas fa-home", link: "https://s.click.taobao.com/zr_aff", desc: "月租立减" }
+            ]
+        },
+        {
+            name: "超市生鲜",
+            iconPre: "fa-shopping-basket",
+            items: [
+                { name: "京东到家", icon: "fab fa-jd", link: "https://s.click.taobao.com/jdd_aff", desc: "满99减20" },
+                { name: "盒马鲜生", icon: "fas fa-fish", link: "https://s.click.taobao.com/hm_aff", desc: "日日鲜" },
+                { name: "叮咚买菜", icon: "fas fa-leaf", link: "https://s.click.taobao.com/dd_aff", desc: "蔬菜满减" },
+                { name: "朴朴超市", icon: "fas fa-store", link: "https://s.click.taobao.com/pp_aff", desc: "新人专享" },
+                { name: "每日优鲜", icon: "fas fa-apple-alt", link: "https://s.click.taobao.com/mryx_aff", desc: "水果特价" },
+                { name: "美团优选", icon: "fas fa-hand-holding-heart", link: "https://s.click.taobao.com/mtyx_aff", desc: "今日团" }
+            ]
+        }
+    ];
+
+    // 3. 醒目常用分类6个
+    const featuredItems = [
+        { name: "京东外卖券", icon: "fas fa-fish", tag: "满199减30", link: "https://open.cdyunzhanxinxi.com/link/100098369ecc5d227ed71002zfmehmAp" },
+        { name: "淘宝闪购大额外卖", icon: "fas fa-pizza-slice", tag: "膨胀红包", link: "https://market.m.taobao.com/app/starlink/wakeup-transit/pages/download?star_id=9249&slk_force_set_request=true&scene=524d32c60ee84078b38f2f4bf99c866c" },
+        { name: "美团外卖红包", icon: "fas fa-hamburger", tag: "无门槛¥10", link: "https://open.cdyunzhanxinxi.com/link/100048369ecde5b6e5a01000e1cfzGDi" },
+        { name: "滴滴打车5折", icon: "fas fa-taxi", tag: "最高减20", link: "https://open.cdyunzhanxinxi.com/link/100115769ed5d4bbcae710028lU6zptH" },
+        { name: "大流量卡", icon: "fas fa-mug-hot", tag: "限今日", link: "https://open.cdyunzhanxinxi.com/link/100115969ed5d69d80b41002GzNLPL6n" },
+        { name: "携程酒店5折", icon: "fas fa-hotel", tag: "大额券", link: "https://open.cdyunzhanxinxi.com/link/100012769ed5bd8227f61000QaEDbB2x" }
+    ];
+
+    // 4. 限时神券数据
+    const couponItems = [
+        { name: "美团外卖", icon: "fas fa-utensils", tag: "满30减12", link: "https://s.click.taobao.com/cpn_mt" },
+        { name: "滴滴出行", icon: "fas fa-car", tag: "7折快车券", link: "https://s.click.taobao.com/cpn_dd" },
+        { name: "星巴克", icon: "fas fa-coffee", tag: "第二杯半价", link: "https://s.click.taobao.com/cpn_sb" },
+        { name: "京东到家", icon: "fab fa-jd", tag: "满89减20", link: "https://s.click.taobao.com/cpn_jd" },
+        { name: "盒马生鲜", icon: "fas fa-shopping-basket", tag: "满199减40", link: "https://s.click.taobao.com/cpn_hm" },
+        { name: "肯德基", icon: "fas fa-drumstick-bite", tag: "蛋挞0.99", link: "https://s.click.taobao.com/cpn_kfc" },
+        { name: "携程旅行", icon: "fas fa-plane", tag: "满500减100", link: "https://s.click.taobao.com/cpn_xc" },
+        { name: "瑞幸咖啡", icon: "fas fa-mug-saucer", tag: "3.8折券", link: "https://s.click.taobao.com/cpn_lk" }
+    ];
+
+    // 5. 品牌特惠数据
+    const brandItems = [
+        { name: "麦当劳", icon: "fab fa-buffer", link: "https://s.click.taobao.com/brand_mcd", desc: "麦辣鸡腿堡套餐" },
+        { name: "海底捞", icon: "fas fa-fan", link: "https://s.click.taobao.com/brand_hdl", desc: "菜品8折券" },
+        { name: "优衣库", icon: "fas fa-tshirt", link: "https://s.click.taobao.com/brand_uni", desc: "满300减40" },
+        { name: "耐克", icon: "fab fa-nike", link: "https://s.click.taobao.com/brand_nike", desc: "会员专享" },
+        { name: "华为商城", icon: "fab fa-huawei", link: "https://s.click.taobao.com/brand_hw", desc: "限时9折" },
+        { name: "小米有品", icon: "fas fa-microchip", link: "https://s.click.taobao.com/brand_xm", desc: "生态链直降" }
+    ];
+
+    // 6. 今日必抢热门商品
+    const hotProductsData = [
+        { name: "美团月卡", icon: "fas fa-ticket-alt", price: "¥8.9", old: "¥30", desc: "领6张5元券", link: "https://s.click.taobao.com/hot_mty" },
+        { name: "滴滴快车礼包", icon: "fas fa-gem", price: "¥0.1", old: "¥50", desc: "秒杀", link: "https://s.click.taobao.com/hot_ddc" },
+        { name: "星巴克星礼卡", icon: "fas fa-gift", price: "¥199", old: "¥299", desc: "赠饮品", link: "https://s.click.taobao.com/hot_sbkc" },
+        { name: "盒马会员季卡", icon: "fas fa-apple-alt", price: "¥29", old: "¥68", desc: "再送券", link: "https://s.click.taobao.com/hot_hmv" },
+        { name: "携程任我行", icon: "fas fa-suitcase", price: "¥888", old: "¥1200", desc: "机票立减", link: "https://s.click.taobao.com/hot_ctrip" },
+        { name: "饿了么超级吃货", icon: "fas fa-bowl-food", price: "¥6.9", old: "¥18", desc: "爆款券包", link: "https://s.click.taobao.com/hot_eleme" }
+    ];
+
+    // 7. 猜你喜欢数据
+    const guessLikeData = [
+        { name: "口碑到店5折券", icon: "fas fa-smile", price: "", old: "", desc: "限时抢", link: "https://s.click.taobao.com/guess_kb" },
+        { name: "高德打车8元券", icon: "fas fa-map", price: "¥0", old: "¥8", desc: "新人专享", link: "https://s.click.taobao.com/guess_gd" },
+        { name: "朴朴满39减10", icon: "fas fa-store", price: "¥29", old: "¥39", desc: "生鲜必备", link: "https://s.click.taobao.com/guess_pp" },
+        { name: "闲鱼闲置免邮", icon: "fas fa-exchange-alt", price: "", old: "", desc: "限量名额", link: "https://s.click.taobao.com/guess_xy" }
+    ];
+	
+    // 友情链接独立数据（动态网格化）
+    const friendLinksData = [
+        { name: "携程旅行网", icon: "fas fa-plane", desc: "机酒特惠", link: "https://ctrip.com/" },
+        { name: "滴滴出行", icon: "fas fa-car", desc: "打车立减", link: "https://didiglobal.com/" },
+        { name: "唯品会", icon: "fas fa-shopping-bag", desc: "品牌特卖", link: "https://vip.com/" },
+        { name: "肯德基", icon: "fab fa-fort-awesome", desc: "疯狂星期四", link: "https://kfc.com.cn/" }
+    ];
+
+    // ---------- 渲染函数 ----------
+    let activeTabIndex = 0;
+
+    function renderCategoryTabs() {
+        const tabsContainer = document.getElementById('categoryTabs');
+        if (!tabsContainer) return;
+        tabsContainer.innerHTML = '';
+        majorCategories.forEach((cat, idx) => {
+            const btn = document.createElement('div');
+            btn.className = `tab-btn ${idx === activeTabIndex ? 'active' : ''}`;
+            btn.innerHTML = `<i class="fas ${cat.iconPre}"></i> ${cat.name}`;
+            btn.addEventListener('click', () => {
+                activeTabIndex = idx;
+                renderCategoryTabs();
+                renderSubCategoryGrid();
+            });
+            tabsContainer.appendChild(btn);
+        });
+    }
+
+    function renderSubCategoryGrid() {
+        const gridContainer = document.getElementById('categoriesGridContainer');
+        if (!gridContainer) return;
+        const current = majorCategories[activeTabIndex];
+        gridContainer.innerHTML = '';
+        if (!current) return;
+        current.items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'grid-icon-item';
+            card.setAttribute('data-url', item.link);
+            card.innerHTML = `<div class="icon-bg"><i class="${item.icon}"></i></div><span>${item.name}</span><small>${item.desc}</small>`;
+            card.addEventListener('click', () => window.open(item.link, '_blank'));
+            gridContainer.appendChild(card);
+        });
+    }
+
+    function renderFeatured() {
+        const container = document.getElementById('featuredSix');
+        if (!container) return;
+        container.innerHTML = featuredItems.map(item => `<div class="feature-card" data-link="${item.link}"><i class="${item.icon}"></i><h4>${item.name}</h4><div class="tag">${item.tag}</div></div>`).join('');
+        document.querySelectorAll('#featuredSix .feature-card').forEach(card => {
+            const link = card.getAttribute('data-link');
+            card.addEventListener('click', () => window.open(link, '_blank'));
+        });
+    }
+
+    function renderCoupons() {
+        const zone = document.getElementById('couponZone');
+        if (!zone) return;
+        zone.innerHTML = couponItems.map(c => `<div class="coupon-card" data-link="${c.link}"><div class="icon-lg"><i class="${c.icon}"></i></div><h4>${c.name}</h4><div class="tag">${c.tag}</div></div>`).join('');
+        document.querySelectorAll('#couponZone .coupon-card').forEach(el => {
+            const link = el.getAttribute('data-link');
+            el.addEventListener('click', () => window.open(link, '_blank'));
+        });
+    }
+
+    function renderBrands() {
+        const zone = document.getElementById('brandZone');
+        if (!zone) return;
+        zone.innerHTML = brandItems.map(b => `<div class="brand-item" data-link="${b.link}"><i class="${b.icon}"></i><h4>${b.name}</h4><small>${b.desc}</small></div>`).join('');
+        document.querySelectorAll('#brandZone .brand-item').forEach(el => {
+            const link = el.getAttribute('data-link');
+            el.addEventListener('click', () => window.open(link, '_blank'));
+        });
+    }
+
+    function renderHotProducts() {
+        const container = document.getElementById('hotProducts');
+        container.innerHTML = hotProductsData.map(p => `<div class="mix-card" data-link="${p.link}"><div class="mix-img"><i class="${p.icon}"></i></div><div class="mix-info"><h4>${p.name}</h4><div><span class="price">${p.price}</span><span class="old-price">${p.old}</span></div><div class="coupon-badge">${p.desc}</div></div></div>`).join('');
+        document.querySelectorAll('#hotProducts .mix-card').forEach(card => {
+            const link = card.getAttribute('data-link');
+            card.addEventListener('click', () => window.open(link, '_blank'));
+        });
+    }
+
+    function renderGuessLike() {
+        const container = document.getElementById('guessLike');
+        container.innerHTML = guessLikeData.map(g => `<div class="mix-card" data-link="${g.link}"><div class="mix-img"><i class="${g.icon}"></i></div><div class="mix-info"><h4>${g.name}</h4><div class="coupon-badge">${g.desc}</div>${g.price ? `<span class="price">${g.price}</span>` : ''}</div></div>`).join('');
+        document.querySelectorAll('#guessLike .mix-card').forEach(card => {
+            const link = card.getAttribute('data-link');
+            card.addEventListener('click', () => window.open(link, '_blank'));
+        });
+    }
+
+    function renderFriendLinks() {
+        const container = document.getElementById('friendLinksContainer');
+        if (!container) return;
+        container.innerHTML = friendLinksData.map(link => `
+            <div class="friend-card" data-url="${link.link}">
+                <i class="${link.icon}"></i>
+                <h4>${link.name}</h4>
+                <p>${link.desc}</p>
+            </div>
+        `).join('');
+        document.querySelectorAll('#friendLinksContainer .friend-card').forEach(card => {
+            const url = card.getAttribute('data-url');
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (url) window.open(url, '_blank');
+            });
+        });
+    }
+
+    // 轮播脚本
+    let currentSlide = 0, autoInterval;
+    const wrapper = document.getElementById('carouselWrapper');
+    const dotsContainer = document.getElementById('dotsContainer');
+    function renderCarousel() {
+        wrapper.innerHTML = banners.map((b, idx) => `<div class="carousel-slide"><a href="${b.link}" target="_blank"><img src="${b.img}" alt="${b.alt}" loading="lazy"></a></div>`).join('');
+        updateDots();
+        updateTransform();
+    }
+    function updateDots() {
+        dotsContainer.innerHTML = banners.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`).join('');
+        document.querySelectorAll('.dot').forEach(dot => dot.addEventListener('click', (e) => { goToSlide(parseInt(dot.dataset.index)); resetAuto(); }));
+    }
+    function updateTransform() { if(wrapper) wrapper.style.transform = `translateX(-${currentSlide * 100}%)`; }
+    function goToSlide(idx) { currentSlide = Math.min(Math.max(idx,0), banners.length-1); updateTransform(); updateDots(); }
+    function nextSlide() { goToSlide((currentSlide+1)%banners.length); resetAuto(); }
+    function prevSlide() { goToSlide((currentSlide-1+banners.length)%banners.length); resetAuto(); }
+    function startAuto() { if(autoInterval) clearInterval(autoInterval); autoInterval = setInterval(nextSlide, 4000); }
+    function resetAuto() { if(autoInterval) clearInterval(autoInterval); startAuto(); }
+    function bindSwipe() {
+        const cont = document.querySelector('.carousel-container');
+        let startX=0;
+        cont.addEventListener('touchstart', e => startX = e.changedTouches[0].clientX);
+        cont.addEventListener('touchend', e => { const endX = e.changedTouches[0].clientX; if(endX - startX > 40) prevSlide(); else if(startX - endX > 40) nextSlide(); resetAuto(); });
+    }
+    function initCarousel() { renderCarousel(); document.getElementById('prevBtn')?.addEventListener('click', prevSlide); document.getElementById('nextBtn')?.addEventListener('click', nextSlide); startAuto(); bindSwipe(); window.addEventListener('resize', updateTransform); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCategoryTabs();
+        renderSubCategoryGrid();
+        renderFeatured();
+        renderCoupons();
+        renderBrands();
+        renderHotProducts();
+        renderGuessLike();
+        renderFriendLinks();
+        initCarousel();
+    });
+</script>
+</body>
+</html>
